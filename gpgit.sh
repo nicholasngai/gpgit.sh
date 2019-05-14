@@ -18,7 +18,7 @@ if ! [[ -d "${GPG_HOMEDIR}" ]]; then
 fi
 
 # Exit if secret key does not exist
-if ! gpg --list-keys 2> /dev/null | grep --quiet "${KEY_NAME}"; then
+if ! gpg --list-secret-keys 2> /dev/null | grep --quiet "${KEY_NAME}"; then
     echo "Error: GPG secret key does not exist" >&2
     exit 2
 fi
