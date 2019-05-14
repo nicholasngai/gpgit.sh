@@ -3,7 +3,7 @@
 GPG_HOMEDIR="$1"
 KEY_NAME="$2"
 
-CR=$(echo '\r')
+CR=$(printf '\r')
 
 # Exit if called without proper arguments
 if [[ -z "${GPG_HOMEDIR}" ]] || [[ -z "${KEY_NAME}" ]]; then
@@ -18,7 +18,7 @@ if ! [[ -d "${GPG_HOMEDIR}" ]]; then
 fi
 
 # Exit if secret key does not exist
-if ! gpg --list-keys 2> /dev/null | grep --quiet "${KEY_NAME}"; then
+if ! gpg --list-secret-keys 2> /dev/null | grep --quiet "${KEY_NAME}"; then
     echo "Error: GPG secret key does not exist" >&2
     exit 2
 fi
@@ -34,7 +34,7 @@ fi
 
 # Generate random MIME boundary
 mime_boundary="pgp-"
-mime_boundary+=$(dd if=/dev/random bs=32 count=1 2> /dev/null | xxd -p | tr -d '\n')
+mime_boundary+=$(dd if=/dev/urandom bs=32 count=1 2> /dev/null | xxd -p | tr -d '\n')
 
 # Rewrite headers to fit PGP/MIME, converting CRLF to LF for compatability with sed
 data_with_headers=$(echo "${data_plain}" | sed '
@@ -43,23 +43,23 @@ data_with_headers=$(echo "${data_plain}" | sed '
 /^$/ {
     # Insert boilerplate PGP/MIME data
     i\
-        Content-Type: multipart/encrypted; boundary="MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552"; protocol="application/pgp-encrypted";\
-        \
-        --MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552\
-        Content-Type: application/pgp-encrypted\
-        Content-Transfer-Encoding: 7bit\
-        \
-        Version: 1\
-        \
-        --MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552\
-        Content-Type: application/octet-stream; name="encrypted.asc"\
-        Content-Transfer-Encoding: 7bit\
-        Content-Disposition: inline; filename="encrypted.asc"
+Content-Type: multipart/encrypted; boundary="MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552"; protocol="application/pgp-encrypted";\
+\
+--MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552\
+Content-Type: application/pgp-encrypted\
+Content-Transfer-Encoding: 7bit\
+\
+Version: 1\
+\
+--MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552\
+Content-Type: application/octet-stream; name="encrypted.asc"\
+Content-Transfer-Encoding: 7bit\
+Content-Disposition: inline; filename="encrypted.asc"
     # Replace original headers within the multipart/encrypted type
     g
     # Append extra newline between original headers and original body
     a\
-        \
+\
 
     # Dump remaining lines
     b dump
