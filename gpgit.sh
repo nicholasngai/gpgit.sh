@@ -1,26 +1,13 @@
 #!/bin/bash
 
-GPG_HOMEDIR="$1"
-KEY_NAME="$2"
+USER_KEY_FILE="$1"
 
 CR=$(printf '\r')
 
-# Exit if called without proper arguments
-if [[ -z "${GPG_HOMEDIR}" ]] || [[ -z "${KEY_NAME}" ]]; then
-    echo 'Usage: ./gpgit.sh [GPG homedir location] [key name]' >&2
+# Exit if called without user key file
+if [[ -z "${USER_KEY_FILE}" ]]; then
+    echo 'Usage: ./gpgit.sh [public key file]' >&2
     exit 0
-fi
-
-# Exit if homedir location does not exit
-if ! [[ -d "${GPG_HOMEDIR}" ]]; then
-    echo "Error: GPG homedir does not exist: ${GPG_HOMEDIR}" >&2
-    exit 1
-fi
-
-# Exit if secret key does not exist
-if ! gpg --list-secret-keys 2> /dev/null | grep --quiet "${KEY_NAME}"; then
-    echo "Error: GPG secret key does not exist" >&2
-    exit 2
 fi
 
 # Read from STDIN, converting CRLF to LF
@@ -138,7 +125,7 @@ echo "${data_with_headers}" | sed '
     n
     b dump
 }
-' | gpg --homedir "${GPG_HOMEDIR}" --batch --armor --encrypt --recipient "${KEY_NAME}" --sign --local-user "${KEY_NAME}"
+' | gpg --batch --no-options --armor --encrypt --recipient-file "${USER_KEY_FILE}" 2> /dev/null
 echo 
 echo "--${mime_boundary}--")
 
