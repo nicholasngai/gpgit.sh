@@ -6,13 +6,13 @@ KEY_NAME="$2"
 CR=$(echo '\r')
 
 # Exit if called without proper arguments
-if [[ -z "$1" ]] || [[ -z "$2" ]]; then
+if [[ -z "${GPG_HOMEDIR}" ]] || [[ -z "${KEY_NAME}" ]]; then
     echo 'Usage: sh gpgit.sh [GPG homedir location] [key name]' >&2
     exit 0
 fi
 
 # Exit if homedir location does not exit
-if ! [[ -d "$1" ]]; then
+if ! [[ -d "${GPG_HOMEDIR}" ]]; then
     echo "Error: GPG homedir does not exist: ${GPG_HOMEDIR}" >&2
     exit 1
 fi
