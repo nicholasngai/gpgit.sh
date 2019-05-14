@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 GPG_HOMEDIR="$1"
 KEY_NAME="$2"
@@ -7,7 +7,7 @@ CR=$(echo '\r')
 
 # Exit if called without proper arguments
 if [[ -z "${GPG_HOMEDIR}" ]] || [[ -z "${KEY_NAME}" ]]; then
-    echo 'Usage: sh gpgit.sh [GPG homedir location] [key name]' >&2
+    echo 'Usage: ./gpgit.sh [GPG homedir location] [key name]' >&2
     exit 0
 fi
 
