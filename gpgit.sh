@@ -43,23 +43,23 @@ data_with_headers=$(echo "${data_plain}" | sed '
 /^$/ {
     # Insert boilerplate PGP/MIME data
     i\
-        Content-Type: multipart/encrypted; boundary="MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552"; protocol="application/pgp-encrypted";\
-        \
-        --MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552\
-        Content-Type: application/pgp-encrypted\
-        Content-Transfer-Encoding: 7bit\
-        \
-        Version: 1\
-        \
-        --MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552\
-        Content-Type: application/octet-stream; name="encrypted.asc"\
-        Content-Transfer-Encoding: 7bit\
-        Content-Disposition: inline; filename="encrypted.asc"
+Content-Type: multipart/encrypted; boundary="MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552"; protocol="application/pgp-encrypted";\
+\
+--MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552\
+Content-Type: application/pgp-encrypted\
+Content-Transfer-Encoding: 7bit\
+\
+Version: 1\
+\
+--MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552\
+Content-Type: application/octet-stream; name="encrypted.asc"\
+Content-Transfer-Encoding: 7bit\
+Content-Disposition: inline; filename="encrypted.asc"
     # Replace original headers within the multipart/encrypted type
     g
     # Append extra newline between original headers and original body
     a\
-        \
+\
 
     # Dump remaining lines
     b dump
