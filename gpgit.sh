@@ -1,14 +1,26 @@
-#!/bin/sh
+#!/bin/bash
 
-GPG_HOMEDIR=/Users/nngai/.gnupg/
-USER="$1"
+GPG_HOMEDIR="$1"
+KEY_NAME="$2"
 
 CR=$(echo '\r')
 
-# Exit if called without email
-if [[ -z "$1" ]]; then
-    echo 'Usage: sh gpgit.sh [email]'
+# Exit if called without proper arguments
+if [[ -z "${GPG_HOMEDIR}" ]] || [[ -z "${KEY_NAME}" ]]; then
+    echo 'Usage: ./gpgit.sh [GPG homedir location] [key name]' >&2
     exit 0
+fi
+
+# Exit if homedir location does not exit
+if ! [[ -d "${GPG_HOMEDIR}" ]]; then
+    echo "Error: GPG homedir does not exist: ${GPG_HOMEDIR}" >&2
+    exit 1
+fi
+
+# Exit if secret key does not exist
+if ! gpg --list-keys 2> /dev/null | grep --quiet "${KEY_NAME}"; then
+    echo "Error: GPG secret key does not exist" >&2
+    exit 2
 fi
 
 # Read from STDIN, converting CRLF to LF
@@ -126,7 +138,7 @@ echo "${data_with_headers}" | sed '
     n
     b dump
 }
-' | gpg --homedir "${GPG_HOMEDIR}" --batch --armor --encrypt --recipient "${USER}" --sign --local-user "${USER}"
+' | gpg --homedir "${GPG_HOMEDIR}" --batch --armor --encrypt --recipient "${KEY_NAME}" --sign --local-user "${KEY_NAME}"
 echo 
 echo "--${mime_boundary}--")
 

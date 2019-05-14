@@ -6,4 +6,4 @@ Emails are read in terminated with either LFs or CRLFs and are outputted termina
 
 # Usage
 
-`sh gpgit.sh [email]`
+`./gpgit.sh [GPG homedir location] [key name]`
