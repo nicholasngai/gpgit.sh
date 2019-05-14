@@ -3,6 +3,8 @@
 GPG_HOMEDIR=/Users/nngai/.gnupg/
 USER="$1"
 
+CR=$(echo '\r')
+
 # Exit if called without email
 if [[ -z "$1" ]]; then
     echo 'Usage: sh gpgit.sh [email]'
@@ -14,7 +16,7 @@ data_plain=$(cat | tr -d '\r')
 
 # Echo data to STDOUT if already encrypted type
 if echo "${data_plain}" | grep -q '^Content-Type: application/pgp-encrypted'; then
-    echo "${data_plain}" | sed 's/$//g'
+    echo "${data_plain}" | sed "s/$/${CR}/g"
     exit 0
 fi
 
@@ -128,4 +130,4 @@ echo "${data_with_headers}" | sed '
 echo 
 echo "--${mime_boundary}--")
 
-echo "${data_encrypted}" | sed 's/$//g'
+echo "${data_encrypted}" | sed "s/$/${CR}/g"
