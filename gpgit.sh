@@ -34,7 +34,7 @@ fi
 
 # Generate random MIME boundary
 mime_boundary="pgp-"
-mime_boundary+=$(dd if=/dev/random bs=32 count=1 2> /dev/null | xxd -p | tr -d '\n')
+mime_boundary+=$(dd if=/dev/urandom bs=32 count=1 2> /dev/null | xxd -p | tr -d '\n')
 
 # Rewrite headers to fit PGP/MIME, converting CRLF to LF for compatability with sed
 data_with_headers=$(echo "${data_plain}" | sed '
