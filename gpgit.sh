@@ -27,6 +27,7 @@ data_with_headers=$(echo "${data_plain}" | sed '
 :start
 # Rewrite standard PGP/MIME headers and body
 /^$/ {
+    # Insert boilerplate PGP/MIME data
     i\
         Content-Type: multipart/encrypted; boundary="MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552"; protocol="application/pgp-encrypted";\
         \
@@ -40,20 +41,28 @@ data_with_headers=$(echo "${data_plain}" | sed '
         Content-Type: application/octet-stream; name="encrypted.asc"\
         Content-Transfer-Encoding: 7bit\
         Content-Disposition: inline; filename="encrypted.asc"
+    # Replace original headers within the multipart/encrypted type
     g
+    # Append extra newline between original headers and original body
+    a\
+        \
+
     # Dump remaining lines
     b dump
 }
 
 # Hold original Content-Type header and delete from pattern space
 /^[Cc][Oo][Nn][Tt][Ee][Nn][Tt]-[Tt][Yy][Pp][Ee]:/ {
+    # Add header to hold space
     H
     :loop1
+    # Delete line
     c\
 
     n
     # If pattern space begins with whitespace (tab or space), aka continued header from previous line
     /^[ 	]/ {
+        # Add continued header to hold space
         H
         b loop1
     }
@@ -63,13 +72,16 @@ data_with_headers=$(echo "${data_plain}" | sed '
 
 # Hold original Content-Transfer-Encoding header and delete from pattern space
 /^[Cc][Oo][Nn][Tt][Ee][Nn][Tt]-[Tt][Rr][Aa][Nn][Ss][Ff][Ee][Rr]-[Ee][Nn][Cc][Oo][Dd][Ii][Nn][Gg]:/ {
+    # Add header to hold space
     H
     :loop2
+    # Delete line
     c\
 
     n
     # If pattern space begins with whitespace (tab or space), aka continued header from previous line
     /^[ 	]/ {
+        # Add continued header to hold space
         H
         b loop2
     }
@@ -88,6 +100,7 @@ b dump
 ' | sed "s/MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552/${mime_boundary}/g")
 
 data_encrypted=$(echo "${data_with_headers}" | sed '
+# Dump just the headers
 /^Content-Type: application\/octet-stream/ {
     :header
     n
@@ -96,6 +109,7 @@ data_encrypted=$(echo "${data_with_headers}" | sed '
 }
 '
 echo "${data_with_headers}" | sed '
+# Dump just the body
 /^Content-Type: application\/octet-stream/ !d
 /^Content-Type: application\/octet-stream/ {
     :header
