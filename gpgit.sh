@@ -3,7 +3,7 @@
 GPG_HOMEDIR="$1"
 KEY_NAME="$2"
 
-CR=$(echo '\r')
+CR=$(printf '\r')
 
 # Exit if called without proper arguments
 if [[ -z "${GPG_HOMEDIR}" ]] || [[ -z "${KEY_NAME}" ]]; then
