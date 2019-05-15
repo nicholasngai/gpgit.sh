@@ -43,11 +43,9 @@ Content-Type: application/octet-stream; name="encrypted.asc"\
 Content-Transfer-Encoding: 7bit\
 Content-Disposition: inline; filename="encrypted.asc"
     # Replace original headers within the multipart/encrypted type
-    g
+    x
     # Append extra newline between original headers and original body
-    a\
-\
-
+    G
     # Dump remaining lines
     b dump
 }
