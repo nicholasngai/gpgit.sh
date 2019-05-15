@@ -113,6 +113,8 @@ echo "${data_with_headers}" | sed '
     N
     s/^.*\n//
     /^$/ !b header
+    N
+    s/^.*\n//
     :dump
     n
     b dump
