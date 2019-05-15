@@ -1,26 +1,13 @@
 #!/bin/bash
 
-GPG_HOMEDIR="$1"
-KEY_NAME="$2"
+USER_KEY_FILE="$1"
 
 CR=$(printf '\r')
 
-# Exit if called without proper arguments
-if [[ -z "${GPG_HOMEDIR}" ]] || [[ -z "${KEY_NAME}" ]]; then
-    echo 'Usage: ./gpgit.sh [GPG homedir location] [key name]' >&2
+# Exit if called without user key file
+if [[ -z "${USER_KEY_FILE}" ]]; then
+    echo 'Usage: ./gpgit.sh [public key file]' >&2
     exit 0
-fi
-
-# Exit if homedir location does not exit
-if ! [[ -d "${GPG_HOMEDIR}" ]]; then
-    echo "Error: GPG homedir does not exist: ${GPG_HOMEDIR}" >&2
-    exit 1
-fi
-
-# Exit if secret key does not exist
-if ! gpg --list-secret-keys 2> /dev/null | grep --quiet "${KEY_NAME}"; then
-    echo "Error: GPG secret key does not exist" >&2
-    exit 2
 fi
 
 # Read from STDIN, converting CRLF to LF
@@ -28,7 +15,7 @@ data_plain=$(cat | tr -d '\r')
 
 # Echo data to STDOUT if already encrypted type
 if echo "${data_plain}" | grep -q '^Content-Type: application/pgp-encrypted'; then
-    echo "${data_plain}" | sed "s/$/${CR}/g"
+    echo "${data_plain}" | sed "s/$/${CR}/"
     exit 0
 fi
 
@@ -56,11 +43,9 @@ Content-Type: application/octet-stream; name="encrypted.asc"\
 Content-Transfer-Encoding: 7bit\
 Content-Disposition: inline; filename="encrypted.asc"
     # Replace original headers within the multipart/encrypted type
-    g
+    x
     # Append extra newline between original headers and original body
-    a\
-\
-
+    G
     # Dump remaining lines
     b dump
 }
@@ -70,10 +55,9 @@ Content-Disposition: inline; filename="encrypted.asc"
     # Add header to hold space
     H
     :loop1
-    # Delete line
-    c\
-
-    n
+    # Delete line and read next
+    N
+    s/^.*\n//
     # If pattern space begins with whitespace (tab or space), aka continued header from previous line
     /^[ 	]/ {
         # Add continued header to hold space
@@ -89,10 +73,9 @@ Content-Disposition: inline; filename="encrypted.asc"
     # Add header to hold space
     H
     :loop2
-    # Delete line
-    c\
-
-    n
+    # Delete line and read next
+    N
+    s/^.*\n//
     # If pattern space begins with whitespace (tab or space), aka continued header from previous line
     /^[ 	]/ {
         # Add continued header to hold space
@@ -111,7 +94,7 @@ b start
 :dump
 n
 b dump
-' | sed "s/MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552/${mime_boundary}/g")
+' | sed "s/MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552/${mime_boundary}/")
 
 data_encrypted=$(echo "${data_with_headers}" | sed '
 # Dump just the headers
@@ -127,19 +110,17 @@ echo "${data_with_headers}" | sed '
 /^Content-Type: application\/octet-stream/ !d
 /^Content-Type: application\/octet-stream/ {
     :header
-    c\
-
-    n
+    N
+    s/^.*\n//
     /^$/ !b header
-    c\
-
-    n
+    N
+    s/^.*\n//
     :dump
     n
     b dump
 }
-' | gpg --homedir "${GPG_HOMEDIR}" --batch --armor --encrypt --recipient "${KEY_NAME}" --sign --local-user "${KEY_NAME}"
+' | gpg --batch --no-options --armor --encrypt --recipient-file "${USER_KEY_FILE}" 2> /dev/null
 echo 
 echo "--${mime_boundary}--")
 
-echo "${data_encrypted}" | sed "s/$/${CR}/g"
+echo "${data_encrypted}" | sed "s/$/${CR}/"
