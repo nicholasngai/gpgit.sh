@@ -15,7 +15,7 @@ data_plain=$(cat | tr -d '\r')
 
 # Echo data to STDOUT if already encrypted type
 if echo "${data_plain}" | grep -q '^Content-Type: application/pgp-encrypted'; then
-    echo "${data_plain}" | sed "s/$/${CR}/g"
+    echo "${data_plain}" | sed "s/$/${CR}/"
     exit 0
 fi
 
@@ -58,10 +58,8 @@ Content-Disposition: inline; filename="encrypted.asc"
     H
     :loop1
     # Delete line and read next
-    c\
-
     N
-    s/\n//g
+    s/^.*\n//
     # If pattern space begins with whitespace (tab or space), aka continued header from previous line
     /^[ 	]/ {
         # Add continued header to hold space
@@ -78,10 +76,8 @@ Content-Disposition: inline; filename="encrypted.asc"
     H
     :loop2
     # Delete line and read next
-    c\
-
     N
-    s/\n//g
+    s/^.*\n//
     # If pattern space begins with whitespace (tab or space), aka continued header from previous line
     /^[ 	]/ {
         # Add continued header to hold space
@@ -100,7 +96,7 @@ b start
 :dump
 n
 b dump
-' | sed "s/MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552/${mime_boundary}/g")
+' | sed "s/MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552/${mime_boundary}/")
 
 data_encrypted=$(echo "${data_with_headers}" | sed '
 # Dump just the headers
@@ -116,10 +112,8 @@ echo "${data_with_headers}" | sed '
 /^Content-Type: application\/octet-stream/ !d
 /^Content-Type: application\/octet-stream/ {
     :header
-    c\
-
     N
-    s/\n//g
+    s/^.*\n//
     /^$/ !b header
     :dump
     n
@@ -129,4 +123,4 @@ echo "${data_with_headers}" | sed '
 echo 
 echo "--${mime_boundary}--")
 
-echo "${data_encrypted}" | sed "s/$/${CR}/g"
+echo "${data_encrypted}" | sed "s/$/${CR}/"
