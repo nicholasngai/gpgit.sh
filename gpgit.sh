@@ -57,10 +57,11 @@ Content-Disposition: inline; filename="encrypted.asc"
     # Add header to hold space
     H
     :loop1
-    # Delete line
+    # Delete line and read next
     c\
 
-    n
+    N
+    s/\n//g
     # If pattern space begins with whitespace (tab or space), aka continued header from previous line
     /^[ 	]/ {
         # Add continued header to hold space
@@ -76,10 +77,11 @@ Content-Disposition: inline; filename="encrypted.asc"
     # Add header to hold space
     H
     :loop2
-    # Delete line
+    # Delete line and read next
     c\
 
-    n
+    N
+    s/\n//g
     # If pattern space begins with whitespace (tab or space), aka continued header from previous line
     /^[ 	]/ {
         # Add continued header to hold space
@@ -116,11 +118,9 @@ echo "${data_with_headers}" | sed '
     :header
     c\
 
-    n
+    N
+    s/\n//g
     /^$/ !b header
-    c\
-
-    n
     :dump
     n
     b dump
