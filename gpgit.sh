@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ENCRYPTED_MIME_TYPES=(
-    'application/pgp-encrypted'
+    'multipart/encrypted'
     'application/pkcs7-mime'
 )
 
@@ -20,7 +20,6 @@ data_plain=$(cat | tr -d '\r')
 
 # Echo data to STDOUT if already encrypted type
 for encrypted_mime_type in "${ENCRYPTED_MIME_TYPES[@]}"; do
-    echo "${encrypted_mime_type}"
     if echo "${data_plain}" | grep --quiet --ignore-case "^Content-Type: ${encrypted_mime_type}"; then
         echo "${data_plain}" | sed "s/$/${CR}/"
         exit 0
