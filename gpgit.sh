@@ -21,7 +21,7 @@ data_plain=$(cat | tr -d '\r')
 # Echo data to STDOUT if already encrypted type
 for encrypted_mime_type in "${ENCRYPTED_MIME_TYPES[@]}"; do
     echo "${encrypted_mime_type}"
-    if echo "${data_plain}" | grep -iq "^Content-Type: ${encrypted_mime_type}"; then
+    if echo "${data_plain}" | grep --quiet --ignore-case "^Content-Type: ${encrypted_mime_type}"; then
         echo "${data_plain}" | sed "s/$/${CR}/"
         exit 0
     fi
@@ -29,7 +29,7 @@ done
 
 # Generate random MIME boundary
 mime_boundary="pgp-"
-mime_boundary+=$(dd if=/dev/urandom bs=32 count=1 2> /dev/null | xxd -p | tr -d '\n')
+mime_boundary+=$(dd if=/dev/urandom bs=32 count=1 2> /dev/null | xxd -plain | tr -d '\n')
 
 # Rewrite headers to fit PGP/MIME, converting CRLF to LF for compatability with sed
 data_with_headers=$(echo "${data_plain}" | sed '
