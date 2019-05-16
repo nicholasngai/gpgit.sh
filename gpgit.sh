@@ -1,5 +1,10 @@
 #!/bin/bash
 
+ENCRYPTED_MIME_TYPES=(
+    'application/pgp-encrypted'
+    'application/pkcs7-mime'
+)
+
 USER_KEY_FILE="$1"
 
 CR=$(printf '\r')
@@ -14,10 +19,13 @@ fi
 data_plain=$(cat | tr -d '\r')
 
 # Echo data to STDOUT if already encrypted type
-if echo "${data_plain}" | grep -q '^Content-Type: application/pgp-encrypted'; then
-    echo "${data_plain}" | sed "s/$/${CR}/"
-    exit 0
-fi
+for encrypted_mime_type in "${ENCRYPTED_MIME_TYPES[@]}"; do
+    echo "${encrypted_mime_type}"
+    if echo "${data_plain}" | grep -iq "^Content-Type: ${encrypted_mime_type}"; then
+        echo "${data_plain}" | sed "s/$/${CR}/"
+        exit 0
+    fi
+done
 
 # Generate random MIME boundary
 mime_boundary="pgp-"
