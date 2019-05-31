@@ -5,9 +5,29 @@ ENCRYPTED_MIME_TYPES=(
     'application/pkcs7-mime'
 )
 
+GNUPG_LOCATIONS=(
+    '/usr/bin/gpg'
+    '/usr/local/bin/gpg'
+    '/bin/gpg'
+)
+
 USER_KEY_FILE="$1"
 
 CR=$(printf '\r')
+
+# Locate GnuPG
+for location in "${GNUPG_LOCATIONS[@]}"; do
+    if [[ -f "${location}" ]]; then
+        gnupg_location="${location}"
+        break
+    fi
+done
+
+# Exit if GnuPG not found
+if [[ -z ${gnupg_location} ]]; then
+    echo 'Error: Could not locate GnuPG binary' >&2
+    exit 1
+fi
 
 # Exit if called without user key file
 if [[ -z "${USER_KEY_FILE}" ]]; then
@@ -126,7 +146,7 @@ echo "${data_with_headers}" | sed '
     n
     b dump
 }
-' | gpg --batch --no-options --armor --encrypt --recipient-file "${USER_KEY_FILE}" 2> /dev/null
+' | "${gnupg_location}" --batch --no-options --armor --encrypt --recipient-file "${USER_KEY_FILE}" 2> /dev/null
 echo 
 echo "--${mime_boundary}--")
 
