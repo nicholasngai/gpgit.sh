@@ -57,7 +57,7 @@ data_with_headers=$(echo "${data_plain}" | sed '
 /^$/ {
     # Insert boilerplate PGP/MIME data
     i\
-Content-Type: multipart/encrypted; boundary="MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552"; protocol="application/pgp-encrypted";\
+Content-Type: multipart/encrypted; boundary="MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552"; protocol="application/pgp-encrypted"\
 \
 --MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552\
 Content-Type: application/pgp-encrypted\
