@@ -30,22 +30,23 @@ done
 mime_boundary=$(dd if=/dev/urandom bs=16 count=1 2> /dev/null | xxd -plain | tr -d '\n')
 
 # Rewrite headers to fit PGP/MIME, converting CRLF to LF for compatability with sed
-data_with_headers=$(echo "${data_plain}" | sed '
+data_with_headers=$(echo "${data_plain}" | sed "
 :start
 # Rewrite standard PGP/MIME headers and body
 /^$/ {
     # Insert boilerplate PGP/MIME data
-    i\
-Content-Type: multipart/encrypted; boundary="MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552"; protocol="application/pgp-encrypted";\
-\
---MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552\
-Content-Type: application/pgp-encrypted\
-\
-Version: 1\
-\
---MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552\
-Content-Type: application/octet-stream; name="encrypted.asc"\
-Content-Disposition: inline; filename="encrypted.asc"
+    i\\
+Content-Type: multipart/encrypted; boundary=\"${mime_boundary}\";\\
+ protocol=\"application/pgp-encrypted\";\\
+\\
+--${mime_boundary}\\
+Content-Type: application/pgp-encrypted\\
+\\
+Version: 1\\
+\\
+--${mime_boundary}\\
+Content-Type: application/octet-stream; name=\"encrypted.asc\"\\
+Content-Disposition: inline; filename=\"encrypted.asc\"
     # Replace original headers within the multipart/encrypted type
     x
     # Append extra newline between original headers and original body
@@ -61,7 +62,7 @@ Content-Disposition: inline; filename="encrypted.asc"
     :loop1
     # Delete line and read next
     N
-    s/^.*\n//
+    s/^.*\\n//
     # If pattern space begins with whitespace (tab or space), aka continued header from previous line
     /^[ 	]/ {
         # Add continued header to hold space
@@ -79,7 +80,7 @@ Content-Disposition: inline; filename="encrypted.asc"
     :loop2
     # Delete line and read next
     N
-    s/^.*\n//
+    s/^.*\\n//
     # If pattern space begins with whitespace (tab or space), aka continued header from previous line
     /^[ 	]/ {
         # Add continued header to hold space
@@ -98,9 +99,9 @@ b start
 :dump
 n
 b dump
-' | sed "s/MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552/${mime_boundary}/")
+")
 
-data_encrypted=$(echo "${data_with_headers}" | sed '
+data_encrypted=$(echo "${data_with_headers}" | sed "
 # Dump just the headers
 /^Content-Type: application\/octet-stream/ {
     :header
@@ -108,22 +109,22 @@ data_encrypted=$(echo "${data_with_headers}" | sed '
     /^$/ !b header
     /^$/ q
 }
-'
-echo "${data_with_headers}" | sed '
+"
+echo "${data_with_headers}" | sed "
 # Dump just the body
 /^Content-Type: application\/octet-stream/ !d
 /^Content-Type: application\/octet-stream/ {
     :header
     N
-    s/^.*\n//
+    s/^.*\\n//
     /^$/ !b header
     N
-    s/^.*\n//
+    s/^.*\\n//
     :dump
     n
     b dump
 }
-' | gpg --batch --no-options --armor --encrypt --recipient-file "${USER_KEY_FILE}" 2> /dev/null
+" | gpg --batch --no-options --armor --encrypt --recipient-file "${USER_KEY_FILE}" 2> /dev/null
 echo 
 echo "--${mime_boundary}--")
 
