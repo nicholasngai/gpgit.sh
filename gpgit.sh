@@ -10,7 +10,7 @@ USER_KEY_FILE="$1"
 CR=$(printf '\r')
 
 # Exit if called without user key file
-if [[ -z "${USER_KEY_FILE}" ]]; then
+if [ -z "${USER_KEY_FILE}" ]; then
     echo 'Usage: ./gpgit.sh [public key file]' >&2
     exit 0
 fi
