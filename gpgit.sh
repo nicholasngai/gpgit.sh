@@ -40,13 +40,11 @@ Content-Type: multipart/encrypted; boundary="MIME_PLACEHOLDER-4d494d455f504c4143
 \
 --MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552\
 Content-Type: application/pgp-encrypted\
-Content-Transfer-Encoding: 7bit\
 \
 Version: 1\
 \
 --MIME_PLACEHOLDER-4d494d455f504c414345484f4c444552\
 Content-Type: application/octet-stream; name="encrypted.asc"\
-Content-Transfer-Encoding: 7bit\
 Content-Disposition: inline; filename="encrypted.asc"
     # Replace original headers within the multipart/encrypted type
     x
